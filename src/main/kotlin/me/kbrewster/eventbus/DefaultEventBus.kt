@@ -2,24 +2,24 @@ package me.kbrewster.eventbus
 
 import java.util.concurrent.CopyOnWriteArrayList
 
-class DefaultEventBus: AbstractEventBus() {
+class DefaultEventBus : AbstractEventBus() {
 
     private val subscriptions = HashMap<Class<*>, CopyOnWriteArrayList<SubscriberData>>()
 
     override fun register(obj: Any) {
         val clazz = obj.javaClass
         // iterates though all the methods in the class
-        for (method in clazz.declaredMethods) {
-            // all the informaton and error checking before the method is added such
-            // as if it even is an event before the element even touches the hashmap
+        for (method in clazz.methods) {
+            // all the information and error checking before the method is added such
+            // as if it even is an event before the element even touches the HashMap
             method.getAnnotation(Subscribe::class.java) ?: continue
             val event = method.parameters.first().type ?: throw
             IllegalArgumentException("Couldn't find parameter inside of ${method.name}!")
             val priority = method.getAnnotation(Subscribe::class.java).value
             method.isAccessible = true
 
-            // where the method gets added to the event key inside of the subscription hashmap
-            // the arraylist is either sorted or created before the element is added
+            // where the method gets added to the event key inside of the subscription HashMap
+            // the ArrayList is either sorted or created before the element is added
             this.subscriptions.let { subs ->
                 if (subs.containsKey(event)) {
                     // sorts array on insertion
